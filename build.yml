@@ -1,0 +1,29 @@
+name: Build APK
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip project
+        run: |
+          ls -laR . | head -50
+          Z=$(find . -name '*.zip' -not -path './src/*' | head -1)
+          echo "zip = $Z"
+          test -n "$Z" || { echo "zip 파일이 저장소에 없습니다"; exit 1; }
+          unzip -o -q "$Z" -d src
+          ls src
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+      - name: Build
+        run: gradle assembleDebug --no-daemon --stacktrace
+        working-directory: src/CallAssist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CallAssist-apk
+          path: src/CallAssist/app/build/outputs/apk/debug/*.apk
