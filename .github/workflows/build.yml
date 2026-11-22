@@ -8,7 +8,7 @@ jobs:
       - name: Unzip project
         run: |
           ls -laR . | head -50
-          Z=$(find . -name '*.zip' -not -path './src/*' | head -1)
+          Z=$(find . -name '*.zip' -not -path './src/*' -printf '%f\t%p\n' | LC_ALL=C sort -V | tail -1 | cut -f2)
           echo "zip = $Z"
           test -n "$Z" || { echo "zip 파일이 저장소에 없습니다"; exit 1; }
           unzip -o -q "$Z" -d src
